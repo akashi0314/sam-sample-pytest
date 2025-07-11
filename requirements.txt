@@ -2,4 +2,3 @@ pytest
 pytest-cov
 boto3
 requests
-moto
