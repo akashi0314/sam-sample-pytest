@@ -1,130 +1,203 @@
-# sam-sample-pytest
+# SAM Sample Pytest - 学習用リポジトリ
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
+このリポジトリは、AWS SAM (Serverless Application Model) と pytest を使ったサーバーレス開発の学習を目的としたサンプルプロジェクトです。
 
-- hello_world - Code for the application's Lambda function.
-- events - Invocation events that you can use to invoke the function.
-- tests - Unit tests for the application code. 
-- template.yaml - A template that defines the application's AWS resources.
+## 📚 このリポジトリで学べること
 
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
+- **AWS SAMの基本的な使い方**
+  - Lambda関数の開発とデプロイ
+  - API Gatewayとの連携
+  - CloudFormationを使ったインフラ管理
 
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
-The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
+- **pytestによるテスト手法**
+  - 単体テスト（Unit Test）
+  - 結合テスト（Integration Test）
+  - テストカバレッジの測定
 
-* [CLion](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [GoLand](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [WebStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [Rider](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PhpStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PyCharm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [RubyMine](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [DataGrip](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
-* [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+- **開発ワークフロー**
+  - ローカル開発環境での動作確認
+  - AWSクラウドへのデプロイ
+  - 自動テストによる品質管理
 
-## Deploy the sample application
+## 🏗️ プロジェクト構成
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+```
+sam-sample-pytest/
+├── hello_world/                # Lambda関数のソースコード
+│   ├── app.py                  # メインのLambda関数
+│   └── requirements.txt        # Python依存関係
+├── tests/                      # テストコード
+│   ├── unit/                   # 単体テスト
+│   └── integration/            # 結合テスト
+├── template.yaml               # SAMテンプレート（AWSリソース定義）
+├── scripts/                    # 自動化スクリプト
+│   └── local-release.sh        # 開発用スクリプト
+├── simple-test.sh              # 学習用ワンストップスクリプト
+└── README.md                   # このファイル
+```
 
-To use the SAM CLI, you need the following tools.
+## 🚀 はじめ方
 
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* [Python 3 installed](https://www.python.org/downloads/)
-* Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+### 必要な環境
 
-To build and deploy your application for the first time, run the following in your shell:
+- **Python 3.12** - プログラミング言語
+- **AWS CLI** - AWSを操作するためのツール
+- **SAM CLI** - サーバーレス開発用ツール
+- **Docker** - ローカル実行用（推奨）
+
+### 🎯 かんたんスタート（推奨）
+
+初心者の方は、学習用スクリプトを使うことをお勧めします：
 
 ```bash
-sam build --use-container
+# 実行権限を付与
+chmod +x simple-test.sh
+
+# 全ステップを順番に実行（学習に最適）
+./simple-test.sh
+
+# または、個別にステップ実行
+./simple-test.sh setup     # 環境確認
+./simple-test.sh build     # ビルド+単体テスト
+./simple-test.sh local     # ローカル動作確認
+./simple-test.sh deploy    # AWSデプロイ+結合テスト
+```
+
+### 📝 手動での実行方法
+
+#### 1. 環境セットアップ
+
+```bash
+# 必要なライブラリをインストール
+pip install pytest pytest-cov boto3 requests
+
+# AWS認証情報を設定
+aws configure
+```
+
+#### 2. ローカル開発
+
+```bash
+# アプリケーションをビルド
+sam build
+
+# 単体テストを実行
+pytest tests/unit/ -v
+
+# ローカルでLambda関数を実行
+sam local invoke HelloWorldFunction --event events/event.json
+
+# ローカルAPIサーバーを起動
+sam local start-api
+# ブラウザで http://localhost:3000/hello にアクセス
+```
+
+#### 3. AWSへのデプロイ
+
+```bash
+# 初回デプロイ（設定を行います）
 sam deploy --guided
+
+# 2回目以降のデプロイ
+sam deploy
 ```
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
-
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
-
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
-
-## Use the SAM CLI to build and test locally
-
-Build your application with the `sam build --use-container` command.
+#### 4. 結合テストの実行
 
 ```bash
-sam-sample-pytest$ sam build --use-container
+# 環境変数を設定して結合テストを実行
+AWS_SAM_STACK_NAME="sam-sample-pytest" pytest tests/integration/ -v
 ```
 
-The SAM CLI installs dependencies defined in `hello_world/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+## 🧪 テスト構成
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+### 単体テスト (`tests/unit/`)
+- Lambda関数の個別機能をテスト
+- 外部サービスに依存しない高速なテスト
+- 開発中の素早いフィードバック
 
-Run functions locally and invoke them with the `sam local invoke` command.
+### 結合テスト (`tests/integration/`)
+- 実際のAWS環境での動作をテスト
+- API Gateway + Lambda の連携確認
+- 本番環境に近い条件でのテスト
+
+**テスト例：**
+```python
+# 単体テスト例
+def test_lambda_handler():
+    # Lambda関数の戻り値をテスト
+    response = lambda_handler(test_event, None)
+    assert response['statusCode'] == 200
+
+# 結合テスト例  
+def test_api_gateway_integration():
+    # 実際のAPIエンドポイントをテスト
+    response = requests.get(api_url)
+    assert response.status_code == 200
+```
+
+## 📖 学習の進め方
+
+### 🔰 初心者向け
+
+1. **まずは実行してみる**
+   ```bash
+   ./simple-test.sh
+   ```
+
+2. **コードを読んでみる**
+   - `hello_world/app.py` - Lambda関数
+   - `template.yaml` - AWSリソース定義
+   - `tests/` - テストコード
+
+3. **コードを変更してみる**
+   - レスポンスメッセージを変更
+   - 新しいテストケースを追加
+
+### 🚀 中級者向け
+
+- Lambda関数に新機能を追加
+- DynamoDBなどの他のAWSサービスと連携
+- CI/CDパイプラインの構築
+- セキュリティの実装
+
+## 🛠️ 便利なコマンド
 
 ```bash
-sam-sample-pytest$ sam local invoke HelloWorldFunction --event events/event.json
-```
+# ログの確認
+sam logs -n HelloWorldFunction --stack-name sam-sample-pytest --tail
 
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
+# ローカルでAPIを起動してテスト
+sam local start-api &
+curl http://localhost:3000/hello
 
-```bash
-sam-sample-pytest$ sam local start-api
-sam-sample-pytest$ curl http://localhost:3000/
-```
+# テストカバレッジの詳細表示
+pytest tests/unit/ --cov=hello_world --cov-report=html
 
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
-
-```yaml
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-```
-
-## Add a resource to your application
-The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
-
-## Fetch, tail, and filter Lambda function logs
-
-To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs` lets you fetch logs generated by your deployed Lambda function from the command line. In addition to printing the logs on the terminal, this command has several nifty features to help you quickly find the bug.
-
-`NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
-
-```bash
-sam-sample-pytest$ sam logs -n HelloWorldFunction --stack-name "sam-sample-pytest" --tail
-```
-
-You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
-
-## Tests
-
-Tests are defined in the `tests` folder in this project. Use PIP to install the test dependencies and run tests.
-
-```bash
-sam-sample-pytest$ pip install -r tests/requirements.txt --user
-# unit test
-sam-sample-pytest$ python -m pytest tests/unit -v
-# integration test, requiring deploying the stack first.
-# Create the env variable AWS_SAM_STACK_NAME with the name of the stack we are testing
-sam-sample-pytest$ AWS_SAM_STACK_NAME="sam-sample-pytest" python -m pytest tests/integration -v
-```
-
-## Cleanup
-
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
-
-```bash
+# リソースの削除
 sam delete --stack-name "sam-sample-pytest"
 ```
 
-## Resources
+## 🌐 参考リンク
 
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
+- **AWS SAM 公式ドキュメント**: [aws.amazon.com/serverless/sam](https://aws.amazon.com/serverless/sam/)
+- **pytest 公式ドキュメント**: [docs.pytest.org](https://docs.pytest.org/)
+- **AWS Lambda 開発者ガイド**: [docs.aws.amazon.com/lambda](https://docs.aws.amazon.com/lambda/)
 
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+## 🤝 貢献方法
+
+このリポジトリは学習目的で作成されています。改善案やバグ報告があれば、以下の方法で貢献できます：
+
+1. Issueを作成して問題や改善案を報告
+2. Fork してプルリクエストを送信
+3. 学習者向けのドキュメント改善
+
+## 📄 ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。学習・改変・再配布は自由に行えます。
+
+---
+
+**🎓 学習を楽しんでください！** 
+
+質問があれば、Issueで気軽に聞いてください。初心者の方も歓迎です！
